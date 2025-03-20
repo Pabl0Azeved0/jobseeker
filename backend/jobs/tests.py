@@ -57,7 +57,7 @@ class JobAPITest(TestCase):
             salary=80000,
             posted_by=self.user
         )
-        
+
         # Reindex after job creation
         call_command('search_index', '--rebuild', '-f')
 
