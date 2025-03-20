@@ -142,7 +142,7 @@ CELERY_RESULT_BACKEND = 'redis://redis:6379/0'
 # Elasticsearch configuration
 ELASTICSEARCH_DSL = {
     'default': {
-        'hosts': 'elasticsearch:9200'
+        'hosts': 'http://elasticsearch:9200'
     },
 }
 
