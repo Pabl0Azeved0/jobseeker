@@ -15,7 +15,7 @@ JobSeeker is a modern, full-stack **Job Portal** designed to demonstrate profici
 
 ### Frontend
 - **React** with TypeScript
-- **Chakra UI** for modern responsive UI
+- **Tailwind CSS** for styling & responsiveness
 - **Redux Toolkit** for state management
 - **React Query** for data fetching
 - **Vite** as the build tool
