@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
 from django.contrib.auth.password_validation import validate_password
+from django.core.validators import validate_email
 from accounts.models import CustomUser
 
 
@@ -19,6 +20,15 @@ class UserSignupSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
         fields = ('username', 'email', 'password', 'password2')
+
+    def validate_email(self, value):
+        validate_email(value)
+        return value
+
+    def validate_username(self, value):
+        if len(value) < 3:
+            raise serializers.ValidationError("Username must have at least 3 characters.")
+        return value
 
     def validate(self, attrs):
         if attrs['password'] != attrs['password2']:
