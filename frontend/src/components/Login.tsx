@@ -21,6 +21,10 @@ export default function Login() {
     dispatch(loginUser({ username, password }));
   };
 
+  const handleEnter = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') handleLogin();
+  };
+
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
       <div className="bg-white p-8 shadow-xl rounded-xl w-80">
@@ -38,6 +42,7 @@ export default function Login() {
           className="w-full mb-4 p-2 border rounded"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
+          onKeyDown={handleEnter}
         />
         {error && <p className="text-red-500 text-sm mb-2">{error}</p>}
         <div className="text-center mb-4">

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import api from '../api/api';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 export default function Signup() {
   const navigate = useNavigate();
@@ -85,11 +85,14 @@ export default function Signup() {
         {error && <p className="text-red-500 text-sm mb-2">{error}</p>}
         {success && <p className="text-green-500 text-sm mb-2">{success}</p>}
         <button
-          className="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600 transition duration-200"
+          className="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600 transition duration-200 mb-1"
           onClick={handleSignup}
         >
           Sign Up
         </button>
+        <Link to={"/login"} className='w-full rounded py-2 block text-white text-center bg-red-500 hover:bg-red-600'>
+          Back to Login
+        </Link>
       </div>
     </div>
   );
