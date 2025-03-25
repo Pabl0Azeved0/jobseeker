@@ -29,12 +29,6 @@ export default function Jobs() {
           >
             + Create Job
           </Link>
-          <Link
-            to="/my-applications"
-            className="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded"
-          >
-            My Applications
-          </Link>
         </div>
       </div>
       <ul className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">

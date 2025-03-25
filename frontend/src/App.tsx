@@ -8,22 +8,25 @@ import { useSelector } from 'react-redux';
 import JobDetails from './components/JobDetails';
 import JobForm from './components/JobForm';
 import MyApplications from './components/MyApplications';
-
+import Profile from './pages/Profile';
+import Navbar from './components/Navbar';
 export default function App() {
   const { isAuthenticated } = useSelector((state: RootState) => state.auth);
 
   return (
     <BrowserRouter>
+      {isAuthenticated && <Navbar />}
       <Routes>
         <Route path="/login" element={isAuthenticated ? <Navigate to="/" /> : <Login />} />
-        <Route element={<PrivateRoute />}>
-          <Route path="/" element={isAuthenticated ? <Jobs /> : <Navigate to="/login" />} />
-        </Route>
         <Route path="/signup" element={<Signup />} />
-        <Route path="/jobs/:id" element={isAuthenticated ? <JobDetails /> : <Navigate to="/login" />} />
-        <Route path="/jobs/new" element={isAuthenticated ? <JobForm /> : <Navigate to="/login" />} />
-        <Route path="/jobs/edit/:id" element={isAuthenticated ? <JobForm /> : <Navigate to="/login" />} />
-        <Route path="/my-applications" element={isAuthenticated ? <MyApplications /> : <Navigate to="/login" />} />
+        <Route element={<PrivateRoute />}>
+          <Route path="/" element={<Jobs />} />
+          <Route path="/jobs/:id" element={<JobDetails />} />
+          <Route path="/jobs/new" element={<JobForm />} />
+          <Route path="/jobs/edit/:id" element={<JobForm />} />
+          <Route path="/my-applications" element={<MyApplications />} />
+          <Route path="/profile" element={<Profile />} />
+        </Route>
       </Routes>
     </BrowserRouter>
   );
