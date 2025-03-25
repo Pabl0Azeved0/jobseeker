@@ -7,6 +7,7 @@ import { RootState } from './redux/store';
 import { useSelector } from 'react-redux';
 import JobDetails from './components/JobDetails';
 import JobForm from './components/JobForm';
+import MyApplications from './components/MyApplications';
 
 export default function App() {
   const { isAuthenticated } = useSelector((state: RootState) => state.auth);
@@ -22,6 +23,7 @@ export default function App() {
         <Route path="/jobs/:id" element={isAuthenticated ? <JobDetails /> : <Navigate to="/login" />} />
         <Route path="/jobs/new" element={isAuthenticated ? <JobForm /> : <Navigate to="/login" />} />
         <Route path="/jobs/edit/:id" element={isAuthenticated ? <JobForm /> : <Navigate to="/login" />} />
+        <Route path="/my-applications" element={isAuthenticated ? <MyApplications /> : <Navigate to="/login" />} />
       </Routes>
     </BrowserRouter>
   );

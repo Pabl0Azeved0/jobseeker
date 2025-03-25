@@ -1,5 +1,5 @@
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import api from '../api/api';
 
 export default function JobDetails() {
@@ -20,6 +20,30 @@ export default function JobDetails() {
     }
   };
 
+  const handleEdit = async () => {
+    navigate(`/jobs/edit/${job.id}`);
+  }
+
+  const applyMutation = useMutation({
+    mutationFn: async () => {
+      const response = await api.post('applications/', { job_id: id, status: 'applied' });
+      return response.data;
+    },
+    onSuccess: () => {
+      alert('Successfully applied!');
+      queryClient.invalidateQueries({ queryKey: ['applications'] });
+    },
+    onError: (error: any) => {
+      if (error.response?.status === 400) {
+        alert('You have already applied to this job.');
+      } else {
+        alert('Application failed, please try again.');
+      }
+    },
+  });
+
+  const handleApply = () => applyMutation.mutate();
+
   if (isLoading) return <div className="p-4">Loading...</div>;
   if (error) return <div className="p-4 text-red-500">Error loading job details.</div>;
 
@@ -30,9 +54,15 @@ export default function JobDetails() {
       <p className="mb-2"><strong>Location:</strong> {job.location}</p>
       <p className="mb-2"><strong>Salary:</strong> ${job.salary}</p>
       <p className="mb-4">{job.description}</p>
-
-      <Link to={`/jobs/edit/${job.id}`} className="mr-1 bg-blue-500 text-white py-2 px-4 rounded">Edit</Link>
-      <button onClick={handleDelete} className="bg-red-500 text-white py-2 px-4 rounded">Delete</button>
+      <div>
+        <div className='mb-1'>
+          <button onClick={handleApply} className='bg-green-500 text-white py-3 px-12 rounded'>
+            Apply
+          </button>
+        </div>
+        <button onClick={handleEdit} className="bg-blue-500 text-white py-2 px-4 rounded mr-1">Edit</button>
+        <button onClick={handleDelete} className="bg-red-500 text-white py-2 px-4 rounded">Delete</button>
+      </div>
     </div>
   );
 }
