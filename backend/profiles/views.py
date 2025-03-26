@@ -39,3 +39,11 @@ class ProfileSearchView(APIView):
             } for hit in response
         ]
         return Response(results)
+
+class MyProfileView(generics.RetrieveUpdateAPIView):
+    serializer_class = ProfileSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_object(self):
+        profile, created = Profile.objects.get_or_create(user=self.request.user)
+        return profile
