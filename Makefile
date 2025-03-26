@@ -22,6 +22,7 @@ recreate-db:
 	docker compose run backend python manage.py makemigrations
 	docker compose run backend python manage.py migrate
 	docker compose run backend python manage.py createsuperuser
+	docker compose up --build -d
 
 ## Frontend
 reinstall-frontend:
