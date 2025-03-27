@@ -10,6 +10,7 @@ class Profile(models.Model):
     birth_date = models.DateField(null=True, blank=True)
     skills = models.TextField(blank=True, help_text='Comma-separated skills')
     contact = models.CharField(max_length=255, blank=True)
+    resume = models.FileField(upload_to='resumes/', null=True, blank=True)
 
     def __str__(self):
         return f"{self.user.username}'s Profile"
