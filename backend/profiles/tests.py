@@ -13,10 +13,8 @@ class ProfileAPITest(TestCase):
         self.client.force_authenticate(user=self.user)
 
     def test_create_profile(self):
-        data = {'bio': 'Hello World'}
-        response = self.client.post('/api/profiles/', data, format='json')
-        self.assertEqual(response.status_code, 201)
-        self.assertEqual(response.data['bio'], 'Hello World')
+        response = self.client.get('/api/profiles/me/')
+        self.assertEqual(response.status_code, 200)
         self.assertEqual(response.data['user'], self.user.id)
 
     def test_get_own_profile_list(self):

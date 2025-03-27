@@ -18,12 +18,13 @@ class ApplicationAPITest(TestCase):
 
     def test_create_application(self):
         response = self.client.post('/api/applications/', {
-            'job': self.job.id,
+            'job_id': self.job.id,
             'cover_letter': 'I am interested.'
         }, format='json')
         self.assertEqual(response.status_code, 201)
         self.assertEqual(response.data['cover_letter'], 'I am interested.')
-        self.assertEqual(response.data['applicant'], self.user.id)
+        self.assertEqual(response.data['job']['id'], str(self.job.id))
+        self.assertEqual(response.data['status'], 'applied')
 
     def test_get_application(self):
         app = Application.objects.create(
