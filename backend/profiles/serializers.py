@@ -6,4 +6,4 @@ class ProfileSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Profile
-        fields = ['bio', 'resume']
+        fields = '__all__'
