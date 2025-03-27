@@ -3,7 +3,7 @@ reset-index:
 	docker compose run backend python manage.py search_index --rebuild -f
 
 reset-dockers:
-	docker compose down -v
+	docker compose down
 	docker compose up --build -d
 
 migrate:
