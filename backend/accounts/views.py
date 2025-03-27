@@ -3,6 +3,8 @@ from rest_framework.response import Response
 from django.contrib.auth import get_user_model
 from .serializers import UserSerializer, UserSignupSerializer
 from profiles.models import Profile
+from django.core.mail import send_mail
+from django.conf import settings
 User = get_user_model()
 
 class UserListView(generics.ListAPIView):
@@ -27,3 +29,14 @@ class SignupView(generics.CreateAPIView):
         Profile.objects.create(user=user)
 
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    def perform_create(self, serializer):
+        user = serializer.save()
+
+        send_mail(
+            'Welcome to JobSeeker!',
+            f'Hello {user.username},\n\nThank you for joining JobSeeker!',
+            settings.DEFAULT_FROM_EMAIL,
+            [user.email],
+            fail_silently=False,
+        )
