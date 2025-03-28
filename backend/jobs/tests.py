@@ -4,13 +4,12 @@ from django.contrib.auth import get_user_model
 from django.core.management import call_command
 from .models import Job
 
-
 User = get_user_model()
 
 class JobAPITest(TestCase):
     def setUp(self):
         self.client = APIClient()
-        self.user = User.objects.create_user(username='testuser', password='testpass')
+        self.user = User.objects.create_user(username='testuser', password='testpass', role='recruiter')  # <-- FIX: role='recruiter'
         self.client.force_authenticate(user=self.user)
 
     def test_job_creation(self):
@@ -58,7 +57,6 @@ class JobAPITest(TestCase):
             posted_by=self.user
         )
 
-        # Reindex after job creation
         call_command('search_index', '--rebuild', '-f')
 
         response = self.client.get('/api/jobs/search/?q=Elasticsearch')
