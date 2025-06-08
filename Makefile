@@ -25,6 +25,12 @@ recreate-db:
 	docker compose run backend python manage.py search_index --rebuild -f
 	docker compose up --build -d
 
+create-db:
+	docker compose run backend python manage.py makemigrations
+	docker compose run backend python manage.py migrate
+	docker compose run backend python manage.py createsuperuser
+	docker compose run backend python manage.py search_index --rebuild -f
+
 ## Frontend
 reinstall-frontend:
 	rm -rf node_modules package-lock.json
