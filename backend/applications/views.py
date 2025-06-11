@@ -27,3 +27,9 @@ class ApplicationDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Application.objects.all()
     serializer_class = ApplicationSerializer
     permission_classes = [permissions.IsAuthenticated]
+    
+    def get_queryset(self):
+        """
+        This ensures the user can only see/edit/delete their own applications.
+        """
+        return Application.objects.filter(applicant=self.request.user)
