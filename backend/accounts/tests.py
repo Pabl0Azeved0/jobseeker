@@ -164,3 +164,33 @@ class TestUserViews:
         response = api_client.get(url)
         assert response.status_code == status.HTTP_200_OK
         assert response.data['username'] == recruiter_user.username
+
+
+# --- Permission Tests ---
+
+class TestCustomPermissions:
+    # We mock a request and view object for testing permissions directly
+    class MockRequest:
+        def __init__(self, user=None):
+            self.user = user
+
+    class MockView:
+        pass
+
+    def test_is_recruiter_permission(self, seeker_user, recruiter_user, admin_user):
+        """Test the IsRecruiter permission class."""
+        permission = IsRecruiter()
+        view = self.MockView()
+        
+        assert not permission.has_permission(self.MockRequest(user=seeker_user), view)
+        assert permission.has_permission(self.MockRequest(user=recruiter_user), view)
+        assert not permission.has_permission(self.MockRequest(user=admin_user), view)
+
+    def test_is_admin_permission(self, seeker_user, recruiter_user, admin_user):
+        """Test the IsAdmin permission class."""
+        permission = IsAdmin()
+        view = self.MockView()
+
+        assert not permission.has_permission(self.MockRequest(user=seeker_user), view)
+        assert not permission.has_permission(self.MockRequest(user=recruiter_user), view)
+        assert permission.has_permission(self.MockRequest(user=admin_user), view)
