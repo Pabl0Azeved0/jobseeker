@@ -81,3 +81,86 @@ def test_signup_serializer_passwords_mismatch():
     serializer = UserSignupSerializer(data=data)
     assert not serializer.is_valid()
     assert 'password' in serializer.errors
+
+
+# --- View Tests ---
+
+class TestSignupView:
+    def test_successful_signup(self, api_client):
+        """
+        Ensure a user can be created successfully and a profile is created.
+        """
+        url = reverse('signup')
+        data = {
+            "username": "signupuser",
+            "email": "signup@example.com",
+            "password": "StrongPassword123",
+            "password2": "StrongPassword123",
+            "role": "seeker"
+        }
+        response = api_client.post(url, data)
+        
+        assert response.status_code == status.HTTP_201_CREATED
+        assert User.objects.filter(username="signupuser").exists()
+        
+        # Check that a Profile was created
+        user = User.objects.get(username="signupuser")
+        assert hasattr(user, 'profile')
+
+    def test_signup_sends_welcome_email(self, api_client):
+        """
+        Ensure the welcome email is sent after a successful signup.
+        """
+        url = reverse('signup')
+        data = {
+            "username": "emailuser",
+            "email": "emailuser@example.com",
+            "password": "StrongPassword123",
+            "password2": "StrongPassword123",
+        }
+        
+        # We use a context manager to check that one email was sent
+        api_client.post(url, data)
+        
+        assert len(mail.outbox) == 1
+        sent_email = mail.outbox[0]
+        assert sent_email.to == ['emailuser@example.com']
+        assert 'Welcome to JobSeeker!' in sent_email.subject
+
+    def test_signup_with_invalid_data(self, api_client):
+        """
+        Ensure signup fails with invalid data (e.g., short username).
+        """
+        url = reverse('signup')
+        data = {
+            "username": "a", # Too short
+            "email": "invalid@",
+            "password": "123",
+            "password2": "123"
+        }
+        response = api_client.post(url, data)
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+
+
+class TestUserViews:
+    def test_list_users_unauthenticated(self, api_client):
+        """Ensure unauthenticated users cannot list users."""
+        url = reverse('user-list')
+        response = api_client.get(url)
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
+
+    def test_list_users_authenticated(self, api_client, seeker_user):
+        """Ensure authenticated users can list users."""
+        url = reverse('user-list')
+        api_client.force_authenticate(user=seeker_user)
+        response = api_client.get(url)
+        assert response.status_code == status.HTTP_200_OK
+        assert len(response.data) >= 1
+
+    def test_user_detail_view(self, api_client, seeker_user, recruiter_user):
+        """Ensure authenticated users can view a specific user's details."""
+        url = reverse('user-detail', kwargs={'pk': recruiter_user.pk})
+        api_client.force_authenticate(user=seeker_user)
+        response = api_client.get(url)
+        assert response.status_code == status.HTTP_200_OK
+        assert response.data['username'] == recruiter_user.username
