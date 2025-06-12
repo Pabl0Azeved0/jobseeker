@@ -38,3 +38,22 @@ def test_job(recruiter_user):
         salary=120000,
         posted_by=recruiter_user
     )
+
+# --- Model and Serializer Tests ---
+
+def test_application_creation(applicant_user, test_job):
+    """Test creating an Application model instance."""
+    app = Application.objects.create(
+        job=test_job,
+        applicant=applicant_user,
+        cover_letter="I'm a great fit!"
+    )
+    assert app.status == 'applied'
+    assert str(app) == f"{applicant_user.username} - {test_job.title}"
+
+def test_duplicate_application_fails_at_db_level(applicant_user, test_job):
+    """Test the unique_together constraint on the model."""
+    Application.objects.create(job=test_job, applicant=applicant_user)
+    from django.db import IntegrityError
+    with pytest.raises(IntegrityError):
+        Application.objects.create(job=test_job, applicant=applicant_user)
