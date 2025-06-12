@@ -120,3 +120,51 @@ class TestApplicationListCreateView:
         # Should only see 1 application, not all 2
         assert len(response.data) == 1
         assert response.data[0]['applicant']['username'] == applicant_user.username
+
+
+# --- View Tests: Retrieve, Update, Destroy ---
+
+class TestApplicationDetailView:
+    @pytest.fixture
+    def user_application(self, applicant_user, test_job):
+        """Fixture for an application belonging to the main applicant user."""
+        return Application.objects.create(job=test_job, applicant=applicant_user)
+
+    def test_retrieve_own_application(self, api_client, applicant_user, user_application):
+        """Ensure a user can view their own application."""
+        api_client.force_authenticate(user=applicant_user)
+        url = reverse('application-detail', kwargs={'pk': user_application.pk})
+        response = api_client.get(url)
+        assert response.status_code == status.HTTP_200_OK
+        assert response.data['id'] == str(user_application.id)
+        
+    def test_delete_own_application(self, api_client, applicant_user, user_application):
+        """Ensure a user can delete (withdraw) their own application."""
+        api_client.force_authenticate(user=applicant_user)
+        url = reverse('application-detail', kwargs={'pk': user_application.pk})
+        response = api_client.delete(url)
+        assert response.status_code == status.HTTP_204_NO_CONTENT
+        assert not Application.objects.filter(pk=user_application.pk).exists()
+
+    # --- Security Test ---
+    def test_cannot_view_or_delete_another_users_application(self, api_client, recruiter_user, user_application):
+        """
+        SECURITY: Ensure a user cannot access another user's application details.
+        This test checks for a common security flaw.
+        """
+        # Authenticate as the recruiter, who is NOT the applicant
+        api_client.force_authenticate(user=recruiter_user)
+        
+        url = reverse('application-detail', kwargs={'pk': user_application.pk})
+        
+        # Try to view the application
+        get_response = api_client.get(url)
+        # If your permissions are not set up correctly, this will return 200 OK.
+        # It should return 403 Forbidden or 404 Not Found.
+        # Based on your current code, this will likely pass with a 200, revealing a flaw.
+        # To fix this, you need to override get_queryset in ApplicationDetailView.
+        assert get_response.status_code in [status.HTTP_403_FORBIDDEN, status.HTTP_404_NOT_FOUND]
+        
+        # Try to delete the application
+        delete_response = api_client.delete(url)
+        assert delete_response.status_code in [status.HTTP_403_FORBIDDEN, status.HTTP_404_NOT_FOUND]
