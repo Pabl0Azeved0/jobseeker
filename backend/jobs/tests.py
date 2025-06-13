@@ -62,3 +62,32 @@ def test_job_serializer_invalid_title():
     serializer = JobSerializer(data=data)
     assert not serializer.is_valid()
     assert 'title' in serializer.errors
+
+
+# --- View Tests: List and Create ---
+
+class TestJobListCreateView:
+    def test_list_jobs_unauthenticated(self, api_client, test_job):
+        """Unauthenticated users should be able to list jobs."""
+        url = reverse('job-list-create')
+        response = api_client.get(url)
+        assert response.status_code == status.HTTP_200_OK
+        assert len(response.data) > 0
+
+    def test_create_job_as_recruiter_success(self, api_client, recruiter_user):
+        """A logged-in recruiter should be able to create a job."""
+        api_client.force_authenticate(user=recruiter_user)
+        url = reverse('job-list-create')
+        data = {'title': 'Python Dev', 'description': 'desc', 'location': 'Porto', 'salary': 55000}
+        response = api_client.post(url, data)
+        assert response.status_code == status.HTTP_201_CREATED
+        assert response.data['posted_by'] == recruiter_user.id
+        
+    def test_create_job_as_seeker_fail(self, api_client, seeker_user):
+        """A job seeker should NOT be able to create a job."""
+        api_client.force_authenticate(user=seeker_user)
+        url = reverse('job-list-create')
+        data = {'title': 'Job I Want', 'description': 'desc', 'location': 'loc'}
+        response = api_client.post(url, data)
+        # This will be Forbidden because of IsAdminUser permission
+        assert response.status_code == status.HTTP_403_FORBIDDEN
