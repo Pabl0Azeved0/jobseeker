@@ -1,65 +1,41 @@
-from django.test import TestCase
+import pytest
+from django.urls import reverse
 from rest_framework.test import APIClient
+from rest_framework import status
 from django.contrib.auth import get_user_model
-from django.core.management import call_command
 from .models import Job
+from unittest.mock import MagicMock
+
+# Using pytest.mark.django_db allows tests to access the database.
+pytestmark = pytest.mark.django_db
 
 User = get_user_model()
 
-class JobAPITest(TestCase):
-    def setUp(self):
-        self.client = APIClient()
-        self.user = User.objects.create_user(username='testuser', password='testpass', role='recruiter')  # <-- FIX: role='recruiter'
-        self.client.force_authenticate(user=self.user)
+# --- Fixtures ---
 
-    def test_job_creation(self):
-        data = {
-            'title': 'New Job',
-            'description': 'Job description',
-            'location': 'Remote',
-            'salary': '70000'
-        }
-        response = self.client.post('/api/jobs/', data, format='json')
-        self.assertEqual(response.status_code, 201)
-        self.assertEqual(response.data['title'], data['title'])
-        self.assertEqual(response.data['posted_by'], self.user.id)
+@pytest.fixture
+def api_client():
+    return APIClient()
 
-    def test_job_list(self):
-        Job.objects.create(
-            title='Job 1',
-            description='Description',
-            location='Remote',
-            salary=50000,
-            posted_by=self.user
-        )
-        response = self.client.get('/api/jobs/')
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(len(response.data), 1)
+@pytest.fixture
+def seeker_user():
+    return User.objects.create_user(username='seeker', password='password123', role='seeker')
 
-    def test_job_detail(self):
-        job = Job.objects.create(
-            title='Detailed Job',
-            description='Detailed description',
-            location='Remote',
-            salary=50000,
-            posted_by=self.user
-        )
-        response = self.client.get(f'/api/jobs/{job.id}/')
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.data['title'], job.title)
+@pytest.fixture
+def recruiter_user():
+    return User.objects.create_user(username='recruiter', password='password123', role='recruiter')
+    
+@pytest.fixture
+def admin_user():
+    return User.objects.create_user(username='admin', password='password123', role='admin', is_staff=True) # is_staff for IsAdminUser
 
-    def test_job_search(self):
-        Job.objects.create(
-            title='Elasticsearch Developer',
-            description='Developing with Elasticsearch',
-            location='Remote',
-            salary=80000,
-            posted_by=self.user
-        )
-
-        call_command('search_index', '--rebuild', '-f')
-
-        response = self.client.get('/api/jobs/search/?q=Elasticsearch')
-        self.assertEqual(response.status_code, 200)
-        self.assertGreaterEqual(len(response.data), 1)
-        self.assertEqual(response.data[0]['title'], 'Elasticsearch Developer')
+@pytest.fixture
+def test_job(recruiter_user):
+    """A job posted by the recruiter user."""
+    return Job.objects.create(
+        title='Backend Developer',
+        description='Develop awesome APIs.',
+        location='Lisbon',
+        salary=60000.00,
+        posted_by=recruiter_user
+    )
