@@ -39,3 +39,26 @@ def test_job(recruiter_user):
         salary=60000.00,
         posted_by=recruiter_user
     )
+
+
+# --- Model and Serializer Tests ---
+
+def test_job_model_str(test_job):
+    """Test the model's __str__ representation."""
+    assert str(test_job) == 'Backend Developer'
+
+def test_job_serializer_invalid_salary():
+    """Test that the serializer rejects a negative salary."""
+    from .serializers import JobSerializer
+    data = {'title': 'Valid Title', 'description': 'desc', 'location': 'loc', 'salary': -500}
+    serializer = JobSerializer(data=data)
+    assert not serializer.is_valid()
+    assert 'salary' in serializer.errors
+
+def test_job_serializer_invalid_title():
+    """Test that the serializer rejects a short title."""
+    from .serializers import JobSerializer
+    data = {'title': 'A', 'description': 'desc', 'location': 'loc', 'salary': 50000}
+    serializer = JobSerializer(data=data)
+    assert not serializer.is_valid()
+    assert 'title' in serializer.errors
