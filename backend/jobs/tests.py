@@ -127,3 +127,44 @@ class TestJobDetailView:
         url = reverse('job-detail', kwargs={'pk': test_job.pk})
         response = api_client.delete(url)
         assert response.status_code == status.HTTP_403_FORBIDDEN
+
+
+# --- Search View Test with Mocking ---
+
+def test_job_search_view(api_client, mocker):
+    """
+    Test the search view by mocking the Elasticsearch Search object.
+    This avoids needing a live Elasticsearch instance for the test.
+    """
+    url = reverse('job-search')
+    
+    # 1. Create a mock search result object that mimics an Elasticsearch hit.
+    # We use MagicMock which can simulate any attribute or method call.
+    mock_hit = MagicMock()
+    mock_hit.id = 'some-uuid-string'
+    mock_hit.title = 'Mocked Job Title'
+    mock_hit.description = 'A description from the mock.'
+    mock_hit.location = 'Mockville'
+    mock_hit.salary = 99000
+    
+    # 2. Mock the Search class from django_elasticsearch_dsl.
+    # `mocker` is a fixture from the pytest-mock library.
+    mock_search = mocker.patch('jobs.views.Search')
+    
+    # 3. Configure the mock's return value.
+    # We want `Search(...).query(...).execute()` to return our list of mock hits.
+    mock_search.return_value.query.return_value.execute.return_value = [mock_hit]
+
+    # 4. Make the request to the view.
+    response = api_client.get(url, {'q': 'test'})
+    
+    # 5. Assert the results.
+    assert response.status_code == status.HTTP_200_OK
+    assert len(response.data) == 1
+    assert response.data[0]['title'] == 'Mocked Job Title'
+    assert response.data[0]['id'] == 'some-uuid-string'
+    
+    # Optional: Assert that the Search object was called as expected.
+    mock_search.return_value.query.assert_called_with(
+        'multi_match', query='test', fields=['title', 'description', 'location']
+    )
