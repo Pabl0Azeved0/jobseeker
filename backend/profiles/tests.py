@@ -55,3 +55,52 @@ def test_profile_serializer_none_to_empty_str():
     assert validated_data['skills'] == ''
     assert validated_data['contact'] == ''
     assert validated_data['location'] == ''
+
+
+# --- View Tests: MyProfileView ---
+
+class TestMyProfileView:
+    def test_get_my_profile_creates_if_not_exists(self, api_client, seeker_user):
+        """Test GET /profiles/me/ when no profile exists yet; it should be created."""
+        api_client.force_authenticate(user=seeker_user)
+        url = reverse('my-profile')
+        
+        assert not Profile.objects.filter(user=seeker_user).exists()
+        response = api_client.get(url)
+        
+        assert response.status_code == status.HTTP_200_OK
+        assert Profile.objects.filter(user=seeker_user).exists()
+        assert response.data['user'] == seeker_user.id
+
+    def test_update_my_profile(self, api_client, seeker_user):
+        """Test that a user can update their own profile via PATCH."""
+        api_client.force_authenticate(user=seeker_user)
+        # First, ensure the profile exists by calling the endpoint
+        url = reverse('my-profile')
+        api_client.get(url) 
+
+        data = {'bio': 'I am a skilled developer.', 'location': 'Brazil'}
+        response = api_client.patch(url, data)
+        
+        assert response.status_code == status.HTTP_200_OK
+        assert response.data['bio'] == 'I am a skilled developer.'
+        seeker_user.profile.refresh_from_db()
+        assert seeker_user.profile.location == 'Brazil'
+
+    def test_upload_resume_to_my_profile(self, api_client, seeker_user):
+        """Test uploading a file to the resume field."""
+        api_client.force_authenticate(user=seeker_user)
+        url = reverse('my-profile')
+
+        # Create a dummy file in memory for the upload
+        resume_file = SimpleUploadedFile("resume.pdf", b"file_content", content_type="application/pdf")
+        data = {'resume': resume_file}
+        
+        response = api_client.patch(url, data, format='multipart')
+        
+        assert response.status_code == status.HTTP_200_OK
+        assert 'resumes/resume.pdf' in response.data['resume']
+        
+        # Clean up the created file after the test
+        seeker_user.profile.refresh_from_db()
+        seeker_user.profile.resume.delete(save=True)
