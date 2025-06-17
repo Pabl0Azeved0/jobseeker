@@ -148,3 +148,29 @@ class TestProfileAccess:
         response = api_client.get(url)
         
         assert response.status_code == status.HTTP_404_NOT_FOUND
+
+
+# --- Search View Test with Mocking ---
+
+def test_profile_search_view(api_client, mocker):
+    """Test the profile search view by mocking the Elasticsearch Search object."""
+    url = reverse('profile-search')
+    
+    mock_user_data = MagicMock()
+    mock_user_data.username = 'mockuser'
+    mock_user_data.email = 'mock@example.com'
+    
+    mock_hit = MagicMock()
+    mock_hit.id = 'some-profile-uuid'
+    mock_hit.bio = 'Bio of a mocked user'
+    mock_hit.user = mock_user_data
+    
+    mock_search = mocker.patch('profiles.views.Search')
+    mock_search.return_value.query.return_value.execute.return_value = [mock_hit]
+
+    response = api_client.get(url, {'q': 'mock'})
+    
+    assert response.status_code == status.HTTP_200_OK
+    assert len(response.data) == 1
+    assert response.data[0]['bio'] == 'Bio of a mocked user'
+    assert response.data[0]['username'] == 'mockuser'
