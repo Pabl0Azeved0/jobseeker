@@ -104,3 +104,47 @@ class TestMyProfileView:
         # Clean up the created file after the test
         seeker_user.profile.refresh_from_db()
         seeker_user.profile.resume.delete(save=True)
+
+# --- View Tests: ProfileListCreateView & ProfileDetailView ---
+
+class TestProfileAccess:
+    def test_get_profile_list_shows_only_own_profile(self, api_client, seeker_user, other_user):
+        """A user should only see their own profile in the list view."""
+        Profile.objects.create(user=seeker_user, bio="Seeker's Bio")
+        Profile.objects.create(user=other_user, bio="Other's Bio")
+
+        api_client.force_authenticate(user=seeker_user)
+        url = reverse('profile-list-create')
+        response = api_client.get(url)
+        
+        assert response.status_code == status.HTTP_200_OK
+        assert len(response.data) == 1
+        assert response.data[0]['bio'] == "Seeker's Bio"
+
+    def test_cannot_create_second_profile(self, api_client, seeker_user):
+        """
+        Test that a user cannot create a profile via POST if one already exists
+        due to the OneToOneField constraint.
+        """
+        api_client.force_authenticate(user=seeker_user)
+        Profile.objects.create(user=seeker_user, bio="Initial Bio")
+        url = reverse('profile-list-create')
+        data = {'bio': 'Trying to create another one'}
+
+        # Since perform_create is called, this will raise an IntegrityError
+        # at the database level, which DRF should handle gracefully.
+        # Depending on the server setup, this could be a 500 or 400. A 4xx is preferred.
+        with pytest.raises(Exception) as e:
+            api_client.post(url, data)
+        # We expect some kind of error because a profile already exists.
+        assert e is not None
+
+    def test_cannot_access_other_user_profile_detail(self, api_client, seeker_user, other_user):
+        """Test that GET /profiles/<pk>/ returns 404 for another user's profile."""
+        other_profile = Profile.objects.create(user=other_user, bio="Other's Bio")
+        
+        api_client.force_authenticate(user=seeker_user)
+        url = reverse('profile-detail', kwargs={'pk': other_profile.pk})
+        response = api_client.get(url)
+        
+        assert response.status_code == status.HTTP_404_NOT_FOUND
