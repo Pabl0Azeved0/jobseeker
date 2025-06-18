@@ -10,15 +10,18 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 
 User = get_user_model()
 
+
 class UserListView(generics.ListAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
     permission_classes = [IsAuthenticated]
 
+
 class UserDetailView(generics.RetrieveAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
     permission_classes = [IsAuthenticated]
+
 
 class SignupView(generics.CreateAPIView):
     serializer_class = UserSignupSerializer
@@ -37,8 +40,8 @@ class SignupView(generics.CreateAPIView):
         user = serializer.save()
 
         send_mail(
-            'Welcome to JobSeeker!',
-            f'Hello {user.username},\n\nThank you for joining JobSeeker!',
+            "Welcome to JobSeeker!",
+            f"Hello {user.username},\n\nThank you for joining JobSeeker!",
             settings.DEFAULT_FROM_EMAIL,
             [user.email],
             fail_silently=False,
