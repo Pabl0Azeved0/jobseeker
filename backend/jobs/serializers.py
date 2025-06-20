@@ -1,11 +1,12 @@
 from rest_framework import serializers
 from .models import Job
 
+
 class JobSerializer(serializers.ModelSerializer):
     class Meta:
         model = Job
-        fields = '__all__'
-        read_only_fields = ['id', 'posted_by', 'created_at']
+        fields = "__all__"
+        read_only_fields = ["id", "posted_by", "created_at"]
 
     def validate_salary(self, value):
         if value is not None and value < 0:
