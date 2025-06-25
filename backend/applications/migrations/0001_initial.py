@@ -11,20 +11,51 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ('jobs', '0001_initial'),
+        ("jobs", "0001_initial"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='Application',
+            name="Application",
             fields=[
-                ('id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
-                ('cover_letter', models.TextField(blank=True)),
-                ('status', models.CharField(choices=[('applied', 'Applied'), ('viewed', 'Viewed'), ('rejected', 'Rejected'), ('accepted', 'Accepted')], default='applied', max_length=50)),
-                ('applied_at', models.DateTimeField(auto_now_add=True)),
-                ('applicant', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
-                ('job', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='jobs.job')),
+                (
+                    "id",
+                    models.UUIDField(
+                        default=uuid.uuid4,
+                        editable=False,
+                        primary_key=True,
+                        serialize=False,
+                    ),
+                ),
+                ("cover_letter", models.TextField(blank=True)),
+                (
+                    "status",
+                    models.CharField(
+                        choices=[
+                            ("applied", "Applied"),
+                            ("viewed", "Viewed"),
+                            ("rejected", "Rejected"),
+                            ("accepted", "Accepted"),
+                        ],
+                        default="applied",
+                        max_length=50,
+                    ),
+                ),
+                ("applied_at", models.DateTimeField(auto_now_add=True)),
+                (
+                    "applicant",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
+                (
+                    "job",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE, to="jobs.job"
+                    ),
+                ),
             ],
         ),
     ]

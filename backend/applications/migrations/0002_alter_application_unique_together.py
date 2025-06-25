@@ -7,14 +7,14 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('applications', '0001_initial'),
-        ('jobs', '0001_initial'),
+        ("applications", "0001_initial"),
+        ("jobs", "0001_initial"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.AlterUniqueTogether(
-            name='application',
-            unique_together={('job', 'applicant')},
+            name="application",
+            unique_together={("job", "applicant")},
         ),
     ]
