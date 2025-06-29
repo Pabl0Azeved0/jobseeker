@@ -5,16 +5,16 @@ JobSeeker is a modern, full-stack **Job Portal** designed to demonstrate profici
 ## 🚀 Tech Stack
 
 ### Backend
-- **Python** with Django REST Framework
-- **PostgreSQL** Database
-- **Elasticsearch** for advanced job search
-- **Redis** for caching and task queuing (Celery)
-- **JWT** for secure authentication
-- **Celery** for background task processing
-- **Docker & Docker Compose** for container orchestration
+- **Python with Django REST Framework:** The backend is built using Python and Django REST framework to provide scalable, robust, and RESTful API services.
+- **PostgreSQL Database:** Relational database management system used for storing job-related data.
+- **Elasticsearch:** Provides powerful, real-time job search functionality.
+- **Redis:** Used for caching and background task management with Celery.
+- **JWT (JSON Web Token):** Provides secure, token-based authentication for API requests.
+- **Celery:** Manages background tasks such as sending emails, job notifications, etc.
+- **Docker & Docker Compose:** Ensures consistent environments for development, testing, and production.
 
 ### Frontend
-- **React** with TypeScript
+- **React with TypeScript**: The frontend is built using React for a dynamic, modern UI and TypeScript for type safety.
 - **Tailwind CSS** for styling & responsiveness
 - **Redux Toolkit** for state management
 - **React Query** for data fetching
@@ -24,9 +24,9 @@ JobSeeker is a modern, full-stack **Job Portal** designed to demonstrate profici
 
 - **User Authentication** (JWT)
 - **Role-based Access:** Job Seekers, Recruiters, Admins
-- **Advanced Job Search & Filtering** powered by Elasticsearch
-- **CV Upload and Management**
-- **Application Tracking System (ATS)**
+- **Advanced Job Search & Filtering:** Powered by Elasticsearch for searching jobs based on various criteria.
+- **CV Upload and Management:** Allows users to upload and manage resumes.
+- **Application Tracking System (ATS):** Job seekers can track their job applications.
 - **Email Notifications** with SMTP Gmail
 - **Dockerized** for consistent dev and production environments
 
